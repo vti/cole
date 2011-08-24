@@ -1,0 +1,83 @@
+=head1 NAME
+
+Cole - Lightweight DI container
+
+=head1 SYNOPSIS
+
+    $ioc = Cole->new;
+
+    $ioc->register('class name', class => 'Foo');
+    $ioc->register('string',     'Hello, world!');
+    $ioc->register('instance',   Foo->new);
+
+    $ioc->register('dependency', class => 'Bar', deps => 'foo');
+    $ioc->register(
+        'multiple dependencies',
+        class => 'Baz',
+        deps  => ['foo', 'bar']
+    );
+
+=head1 DESCRIPTION
+
+L<Cole> is a lightweight Dependency Injection container.
+
+=head1 FEATURES
+
+=head2 C<Constants>
+
+    $ioc->register('string' => 'Hello world!');
+
+=head2 C<Class names>
+
+    $ioc->register('class' => {class => 'Foo'});
+
+=head2 C<Instances>
+
+    $ioc->register('class' => Foo->new);
+
+=head2 C<Dependencies>
+
+    $ioc->register('class' => {class => 'Foo', deps => 'bar'});
+
+=head2 C<Aliases>
+
+    $ioc->register('class' => {class => 'Foo', deps => {'bar' => 'baz'}});
+
+C<bar> is passed as C<baz> during C<Foo> creation.
+
+=head1 METHODS
+
+=head2 C<new>
+
+    my $ioc = Cole->new;
+
+=head2 C<register>
+
+    $ioc->register('name' => {class => 'foo'});
+
+Register a new dependency.
+
+=head2 C<get>
+
+    $ioc->get('name');
+
+Return an instance of a service by name.
+
+=head1 DEVELOPMENT
+
+=head2 Repository
+
+    http://github.com/vti/cole
+
+=head1 AUTHOR
+
+Viacheslav Tykhanovskyi, C<vti@cpan.org>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2011, Viacheslav Tykhanovskyi
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
+
+=cut
