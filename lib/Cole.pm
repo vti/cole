@@ -6,9 +6,7 @@ use warnings;
 our $VERSION = '0.009001';
 
 require Carp;
-
-use Class::Load  ();
-use Scalar::Util ();
+use Class::Load ();
 
 sub new {
     my $class = shift;
@@ -21,20 +19,13 @@ sub new {
 
 sub register {
     my $self = shift;
-    my $key  = shift;
+    my ($key, $args) = @_;
 
     Carp::croak('Service name is required') unless $key;
+    Carp::croak('Service args are required and must be a hashref')
+      unless $args && ref $args eq 'HASH';
 
-    if (@_ == 1 && !(ref($_[0]) eq 'HASH')) {
-        my $type =
-            Scalar::Util::blessed($_[0]) ? 'instance'
-          : ref($_[0]) eq 'CODE' ? 'block'
-          :                        'constant';
-        $self->{services}->{$key}->{$type} = $_[0];
-        return $self;
-    }
-
-    $self->{services}->{$key} = @_ == 1 ? $_[0] : {@_};
+    $self->{services}->{$key} = {%{$args}};    # Shallow copy
 
     return $self;
 }
@@ -45,8 +36,8 @@ sub get {
 
     my $service = $self->_get($key);
 
-    if (exists $service->{instance}) {
-        return $service->{instance};
+    if (exists $service->{value}) {
+        return $service->{value};
     }
     elsif (exists $service->{block}) {
         my %args = $self->_build_deps($service);
@@ -85,7 +76,7 @@ sub _build_service {
     my $self = shift;
     my ($service) = @_;
 
-    return $service->{constant} if exists $service->{constant};
+    return $service->{value} if exists $service->{value};
 
     Class::Load::load_class($service->{class});
 
@@ -106,8 +97,8 @@ sub _build_deps {
             my ($key, $value) = ($dep, $dep);
 
             if (ref $dep eq 'HASH') {
-                $key   = (keys(%$dep))[0];
-                $value = (values(%$dep))[0];
+                $key   = (values(%$dep))[0];
+                $value = (keys(%$dep))[0];
             }
 
             $args{$key} = $self->get($value);
@@ -147,25 +138,23 @@ L<Cole> is a lightweight Dependency Injection container.
 
 =head1 FEATURES
 
-=head2 C<Constants>
+=head2 C<Values>
 
-    $ioc->register('string' => 'Hello world!');
+    $ioc->register(string   => {value => 'Hello world!'});
+    $ioc->register(instance => {value => Foo->new});
 
 =head2 C<Class names>
 
-    $ioc->register('class' => {class => 'Foo'});
-
-=head2 C<Instances>
-
-    $ioc->register('class' => Foo->new);
+    $ioc->register(class => {class => 'Foo'});
 
 =head2 C<Dependencies>
 
-    $ioc->register('class' => {class => 'Foo', deps => 'bar'});
+    $ioc->register(class => {class => 'Foo', deps => 'bar'});
 
 =head2 C<Aliases>
 
-    $ioc->register('class' => {class => 'Foo', deps => {'bar' => 'baz'}});
+    $ioc->register(bar => {class => 'Bar'});
+    $ioc->register(class => {class => 'Foo', deps => {bar => 'baz'}});
 
 C<bar> is passed as C<baz> during C<Foo> creation.
 
@@ -177,7 +166,7 @@ C<bar> is passed as C<baz> during C<Foo> creation.
 
 =head2 C<register>
 
-    $ioc->register('name' => {class => 'foo'});
+    $ioc->register(name => {class => 'foo'});
 
 Register a new dependency.
 
