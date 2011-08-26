@@ -23,25 +23,23 @@ L<Cole> is a lightweight Dependency Injection container.
 
 =head1 FEATURES
 
-=head2 C<Constants>
+=head2 C<Values>
 
-    $ioc->register('string' => 'Hello world!');
+    $ioc->register(string   => {value => 'Hello world!'});
+    $ioc->register(instance => {value => Foo->new});
 
 =head2 C<Class names>
 
-    $ioc->register('class' => {class => 'Foo'});
-
-=head2 C<Instances>
-
-    $ioc->register('class' => Foo->new);
+    $ioc->register(class => {class => 'Foo'});
 
 =head2 C<Dependencies>
 
-    $ioc->register('class' => {class => 'Foo', deps => 'bar'});
+    $ioc->register(class => {class => 'Foo', deps => 'bar'});
 
 =head2 C<Aliases>
 
-    $ioc->register('class' => {class => 'Foo', deps => {'bar' => 'baz'}});
+    $ioc->register(bar => {class => 'Bar'});
+    $ioc->register(class => {class => 'Foo', deps => {bar => 'baz'}});
 
 C<bar> is passed as C<baz> during C<Foo> creation.
 
@@ -53,7 +51,7 @@ C<bar> is passed as C<baz> during C<Foo> creation.
 
 =head2 C<register>
 
-    $ioc->register('name' => {class => 'foo'});
+    $ioc->register(name => {class => 'foo'});
 
 Register a new dependency.
 
